@@ -1,16 +1,32 @@
 import Foundation
 
-struct WeatherData: Sendable, Codable {
-    let uvIndex: Double
-    let temperatureCelsius: Double
-    let weatherCode: Int
-    let conditionSummary: String
-    let updatedAt: Date
+public struct WeatherData: Sendable, Codable {
+    public let uvIndex: Double
+    public let temperatureCelsius: Double
+    public let weatherCode: Int
+    public let conditionSummary: String
+    public let updatedAt: Date
 
-    var uvLevel: UVLevel {
+    public var uvLevel: UVLevel {
         UVLevel.from(uvIndex: uvIndex)
     }
 
+    public init(
+        uvIndex: Double,
+        temperatureCelsius: Double,
+        weatherCode: Int,
+        conditionSummary: String,
+        updatedAt: Date
+    ) {
+        self.uvIndex = uvIndex
+        self.temperatureCelsius = temperatureCelsius
+        self.weatherCode = weatherCode
+        self.conditionSummary = conditionSummary
+        self.updatedAt = updatedAt
+    }
+}
+
+public extension WeatherData {
     static let placeholder = WeatherData(
         uvIndex: 3.0,
         temperatureCelsius: 21,

@@ -1,4 +1,5 @@
 import Foundation
+import UVBuddyCore
 
 struct AppContainer {
     let weatherService: WeatherService

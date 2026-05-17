@@ -1,16 +1,16 @@
 import Foundation
 
-protocol WeatherService: Sendable {
+public protocol WeatherService: Sendable {
     func fetchWeather(for location: Coordinate) async throws -> WeatherData
 }
 
-enum WeatherServiceError: LocalizedError {
+public enum WeatherServiceError: LocalizedError {
     case invalidURL
     case invalidResponse
     case requestFailed(Int)
     case noDataAvailable
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "Invalid weather request URL."
@@ -24,16 +24,16 @@ enum WeatherServiceError: LocalizedError {
     }
 }
 
-struct OpenMeteoWeatherService: WeatherService, Sendable {
+public struct OpenMeteoWeatherService: WeatherService, Sendable {
     private let session: URLSession
     private let cacheService: CacheService
 
-    init(session: URLSession = .shared, cacheService: CacheService) {
+    public init(session: URLSession = .shared, cacheService: CacheService) {
         self.session = session
         self.cacheService = cacheService
     }
 
-    func fetchWeather(for location: Coordinate) async throws -> WeatherData {
+    public func fetchWeather(for location: Coordinate) async throws -> WeatherData {
         do {
             let request = try makeRequest(for: location)
             let (data, response) = try await session.data(for: request)
@@ -48,7 +48,7 @@ struct OpenMeteoWeatherService: WeatherService, Sendable {
 
             let decoder = JSONDecoder()
             let apiResponse = try decoder.decode(OpenMeteoResponse.self, from: data)
-            let weatherData = try mapToWeatherData(apiResponse)
+            let weatherData = try OpenMeteoMapper.map(apiResponse)
             await cacheService.save(weatherData: weatherData)
             return weatherData
         } catch {
@@ -80,33 +80,12 @@ struct OpenMeteoWeatherService: WeatherService, Sendable {
 
         return URLRequest(url: url)
     }
-
-    private func mapToWeatherData(_ response: OpenMeteoResponse) throws -> WeatherData {
-        guard
-            let temperature = response.current.temperature2m,
-            let weatherCode = response.current.weatherCode
-        else {
-            throw WeatherServiceError.invalidResponse
-        }
-
-        let uvIndex = response.current.uvIndex ?? response.daily.uvIndexMax.first
-
-        guard let uvIndex else {
-            throw WeatherServiceError.invalidResponse
-        }
-
-        return WeatherData(
-            uvIndex: uvIndex,
-            temperatureCelsius: temperature,
-            weatherCode: weatherCode,
-            conditionSummary: WeatherCodeMapper.summary(for: weatherCode),
-            updatedAt: .now
-        )
-    }
 }
 
-struct MockWeatherService: WeatherService, Sendable {
-    func fetchWeather(for location: Coordinate) async throws -> WeatherData {
+public struct MockWeatherService: WeatherService, Sendable {
+    public init() {}
+
+    public func fetchWeather(for location: Coordinate) async throws -> WeatherData {
         _ = location
 
         try await Task.sleep(for: .milliseconds(250))

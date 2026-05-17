@@ -1,4 +1,5 @@
 import SwiftUI
+import UVBuddyCore
 
 @MainActor
 struct CreatureView: View {

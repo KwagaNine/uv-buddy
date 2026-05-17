@@ -18,42 +18,51 @@ Minimal MVP foundation for a SwiftUI UV/weather app built with Swift Package Man
 ├── Package.swift
 ├── README.md
 ├── AGENTS.md
-└── Sources
-    └── UVBuddy
-        ├── UVBuddyApp.swift
-        ├── Features
-        │   └── Home
-        │       ├── HomeView.swift
-        │       ├── HomeViewModel.swift
-        │       └── Components
-        ├── Services
-        │   ├── LocationService.swift
-        │   └── WeatherService.swift
-        ├── Models
-        │   ├── UVLevel.swift
-        │   └── WeatherData.swift
-        ├── Utilities
-        │   └── DesignSystem.swift
-        └── App
-            └── AppContainer.swift
+├── Sources
+│   ├── UVBuddy
+│   │   ├── UVBuddyApp.swift
+│   │   ├── App
+│   │   │   └── AppContainer.swift
+│   │   ├── Features
+│   │   │   └── Home
+│   │   │       ├── HomeView.swift
+│   │   │       ├── HomeViewModel.swift
+│   │   │       └── Components
+│   │   │           ├── CreatureView.swift
+│   │   │           ├── PlaceholderCharacterView.swift
+│   │   │           └── UVStatusCard.swift
+│   │   ├── Models
+│   │   │   └── UVLevel+UI.swift
+│   │   └── Utilities
+│   │       └── DesignSystem.swift
+│   └── UVBuddyCore
+│       ├── Models
+│       │   ├── UVLevel.swift
+│       │   └── WeatherData.swift
+│       └── Services
+│           ├── CacheService.swift
+│           ├── LocationService.swift
+│           ├── OpenMeteoResponse.swift
+│           └── WeatherService.swift
+└── Tests
+    └── UVBuddyCoreTests
+        └── UVBuddyCoreTests.swift
 ```
 
-## Architecture (MVP)
+## Architecture
 
-- `Features/Home`: View + ViewModel for the main screen
-- `Services`: Protocol-driven service layer (`WeatherService`, `LocationService`) with mock implementations
-- `Models`: Domain models (`WeatherData`, `UVLevel`)
-- `Utilities`: Shared UI tokens (`DesignSystem`)
-- `App`: Dependency container to keep composition centralized
+- `UVBuddyCore`: pure Swift module for models, service protocols/implementations, Open-Meteo mapping, and cache logic.
+- `UVBuddy`: iOS SwiftUI app target that depends on `UVBuddyCore`.
+- `UVBuddyCoreTests`: non-UI tests that can run on Linux/WSL.
 
 ## Open-Meteo integration
 
-`OpenMeteoWeatherService` uses `URLSession` + `async/await` and decodes response via `Codable`.
+`OpenMeteoWeatherService` uses `URLSession` + `async/await` and decodes responses via `Codable`.
 If API fails, app loads the last successful `WeatherData` from `UserDefaults` cache.
 
 ## Debug Preview Mode
 
-For visual UI checks on a real iPhone in DEBUG builds, `HomeView` includes a compact debug picker.
+For visual UI checks in DEBUG builds, `HomeView` includes a compact debug picker.
 Available states:
 
 - Loading
@@ -64,28 +73,26 @@ Available states:
 - Extreme UV
 - Error
 
-How to use:
-
-1. Run app in DEBUG.
-2. Open Home screen.
-3. Use `Debug` picker at the bottom of the screen.
-4. Switch states and verify UV text, temperature, weather summary, SPF recommendation, and error rendering.
-
 Debug controls are wrapped in `#if DEBUG` and are not included in release builds.
 
-## Run (macOS)
+## Linux build note (SwiftUI vs Core)
+
+`UVBuddy` app target uses SwiftUI and is intended for iOS/Apple SDK builds.
+Linux cannot compile SwiftUI modules directly, so Linux/WSL validation is done on `UVBuddyCore`.
+
+Use these commands on Linux/WSL:
 
 ```bash
-swift run UVBuddy
+swift build --product UVBuddyCore
+swift test --filter UVBuddyCoreTests
 ```
 
-## Build (including Linux/WSL validation)
+Use these commands on macOS/iOS SDK environments:
 
 ```bash
 swift build
+swift run UVBuddy
 ```
-
-This command validates package structure and cross-platform friendliness at the SwiftPM level.
 
 ## Windows + WSL setup
 
@@ -104,8 +111,7 @@ sudo apt update
 sudo apt install -y curl git clang libicu-dev libsqlite3-dev libpython3-dev libncurses-dev libxml2-dev libcurl4-openssl-dev libedit-dev libz3-dev pkg-config tzdata unzip
 ```
 
-3. Install Swift toolchain in WSL.
-Download the latest Ubuntu toolchain from Swift.org, then:
+3. Install Swift toolchain in WSL:
 
 ```bash
 tar -xzf swift-*.tar.gz
@@ -115,24 +121,17 @@ source ~/.bashrc
 swift --version
 ```
 
-4. Install `xtool` in WSL (choose your preferred method from xtool docs), then verify:
+4. Install `xtool` in WSL (use your standard install method), then verify:
 
 ```bash
 xtool --version
 ```
 
-5. Clone/open this project inside WSL filesystem and run checks:
+5. Validate non-UI core logic:
 
 ```bash
-swift package describe
-swift build
-swift build -c release
-```
-
-6. Optional run command:
-
-```bash
-swift run UVBuddy
+swift build --product UVBuddyCore
+swift test --filter UVBuddyCoreTests
 ```
 
 ## Notes

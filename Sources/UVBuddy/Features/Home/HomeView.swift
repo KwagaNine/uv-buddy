@@ -1,4 +1,5 @@
 import SwiftUI
+import UVBuddyCore
 
 struct HomeView: View {
     @State private var viewModel: HomeViewModel

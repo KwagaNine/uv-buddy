@@ -1,4 +1,5 @@
 import SwiftUI
+import UVBuddyCore
 
 struct UVStatusCard: View {
     let uvIndexText: String
