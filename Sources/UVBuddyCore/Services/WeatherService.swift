@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public protocol WeatherService: Sendable {
     func fetchWeather(for location: Coordinate) async throws -> WeatherData
@@ -24,7 +27,7 @@ public enum WeatherServiceError: LocalizedError {
     }
 }
 
-public struct OpenMeteoWeatherService: WeatherService, Sendable {
+public actor OpenMeteoWeatherService: WeatherService {
     private let session: URLSession
     private let cacheService: CacheService
 
