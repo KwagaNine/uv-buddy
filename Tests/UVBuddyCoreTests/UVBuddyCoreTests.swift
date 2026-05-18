@@ -34,7 +34,7 @@ final class UVBuddyCoreTests: XCTestCase {
         XCTAssertEqual(weather.uvLevel, .veryHigh)
     }
 
-    func testCacheServiceRoundTrip() async {
+    func testCacheServiceRoundTrip() async throws {
         let suiteName = "uvbuddy.tests.cache"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
@@ -49,11 +49,11 @@ final class UVBuddyCoreTests: XCTestCase {
         )
 
         await cache.save(weatherData: input)
-        let output = await cache.loadWeatherData()
+        let output = try XCTUnwrap(await cache.loadWeatherData())
 
-        XCTAssertEqual(output?.uvIndex, input.uvIndex, accuracy: 0.001)
-        XCTAssertEqual(output?.temperatureCelsius, input.temperatureCelsius, accuracy: 0.001)
-        XCTAssertEqual(output?.weatherCode, input.weatherCode)
-        XCTAssertEqual(output?.conditionSummary, input.conditionSummary)
+        XCTAssertEqual(output.uvIndex, input.uvIndex, accuracy: 0.001)
+        XCTAssertEqual(output.temperatureCelsius, input.temperatureCelsius, accuracy: 0.001)
+        XCTAssertEqual(output.weatherCode, input.weatherCode)
+        XCTAssertEqual(output.conditionSummary, input.conditionSummary)
     }
 }
