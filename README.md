@@ -141,70 +141,106 @@ swift test --filter UVBuddyCoreTests
 - No widgets/onboarding/animations yet
 - Placeholder premium-minimal UI only
 
-## xtool iOS build and install
+## xtool workflow for iPhone
 
-This package is compatible with iOS app builds via `xtool`:
+`Package.swift` is compatible with this workflow:
 
-- UI app target: `UVBuddy` (SwiftUI, iOS)
-- Core target: `UVBuddyCore` (pure Swift)
-- No Xcode project required
+- iOS app target: `UVBuddy` (SwiftUI executable target)
+- shared core target: `UVBuddyCore`
+- Linux-safe test target: `UVBuddyCoreTests`
 
-### Example bundle identifier
-
-Use this bundle identifier for local/device builds:
+Bundle ID for device build/install:
 
 - `com.kwaga.uvbuddy`
 
-### Signing requirements
+App display name target:
 
-To install on a physical iPhone, you need:
+- `UV Buddy`
 
-1. Apple Developer account (free account works for basic personal testing, paid account recommended for stable provisioning).
-2. A valid signing certificate available on the build machine.
-3. A provisioning profile that matches:
-   - bundle id: `com.kwaga.uvbuddy`
-   - target device UDID (for development provisioning)
-4. Team ID configured in your signing setup.
+### 1) install xtool
 
-### Build and install flow (xtool)
-
-1. Confirm toolchain and xtool:
+Install `xtool` using your preferred official method, then verify:
 
 ```bash
-swift --version
 xtool --version
 ```
 
-2. Validate package first:
+### 2) xtool setup
+
+Initialize local xtool environment/workspace settings:
 
 ```bash
-swift package describe
-swift build
+xtool setup
 ```
 
-3. Build for iOS with your xtool command/profile (example shape, adapt to your local xtool syntax):
+### 3) xtool auth
+
+Authenticate xtool with your Apple developer context:
 
 ```bash
-xtool build ios --configuration release --bundle-id com.kwaga.uvbuddy
+xtool auth login
 ```
 
-4. Install to connected iPhone (adapt to your local xtool syntax):
+### 4) xtool sdk
+
+Install/select required Apple SDK artifacts used by xtool:
+
+```bash
+xtool sdk list
+xtool sdk install ios
+```
+
+### 5) xtool devices
+
+Connect iPhone and confirm it is visible:
+
+```bash
+xtool devices
+```
+
+### 6) xtool dev/build
+
+First validate package and tests, then build app:
+
+```bash
+swift build --product UVBuddyCore
+swift test --filter UVBuddyCoreTests
+xtool build ios --target UVBuddy --bundle-id com.kwaga.uvbuddy --app-name "UV Buddy"
+```
+
+### 7) xtool install
+
+Install generated app to connected iPhone:
 
 ```bash
 xtool install ios --bundle-id com.kwaga.uvbuddy
 ```
 
-### First device launch checklist
+### 8) xtool launch
 
-1. iPhone is connected and trusted by host machine.
-2. Correct provisioning profile includes this device.
-3. Bundle id exactly matches profile: `com.kwaga.uvbuddy`.
-4. App signed with matching certificate/team.
-5. Build succeeds in release or debug configuration.
-6. App installs successfully on device.
-7. On first launch, if iOS blocks developer app, open:
-   - Settings -> General -> VPN & Device Management -> Trust Developer.
-8. Launch app and verify:
-   - Home screen renders
-   - Weather fetch works (or cache fallback works)
-   - Debug picker appears only in DEBUG builds
+Launch installed app on device:
+
+```bash
+xtool launch ios --bundle-id com.kwaga.uvbuddy
+```
+
+### 9) troubleshooting
+
+If install/launch fails, check:
+
+1. Device is trusted and unlocked.
+2. Provisioning profile includes device UDID.
+3. Signing certificate, Team ID, and bundle id match (`com.kwaga.uvbuddy`).
+4. No secrets/certificates/profiles are committed to repo.
+5. Core tests pass before iOS build:
+   - `swift test --filter UVBuddyCoreTests`
+
+### First iPhone run checklist
+
+1. `xtool auth login` completed.
+2. iOS SDK installed via xtool.
+3. Device detected by `xtool devices`.
+4. Build succeeds for target `UVBuddy`.
+5. App installs with bundle id `com.kwaga.uvbuddy`.
+6. On first launch, trust developer profile in iOS settings if prompted.
+7. Verify app opens to Home screen and weather load path works.
