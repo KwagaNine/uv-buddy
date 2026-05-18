@@ -49,7 +49,8 @@ final class UVBuddyCoreTests: XCTestCase {
         )
 
         await cache.save(weatherData: input)
-        let output = try XCTUnwrap(await cache.loadWeatherData())
+        let cachedOutput = await cache.loadWeatherData()
+        let output = try XCTUnwrap(cachedOutput)
 
         XCTAssertEqual(output.uvIndex, input.uvIndex, accuracy: 0.001)
         XCTAssertEqual(output.temperatureCelsius, input.temperatureCelsius, accuracy: 0.001)
