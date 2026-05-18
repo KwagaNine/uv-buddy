@@ -140,3 +140,71 @@ swift test --filter UVBuddyCoreTests
 - No Storyboards
 - No widgets/onboarding/animations yet
 - Placeholder premium-minimal UI only
+
+## xtool iOS build and install
+
+This package is compatible with iOS app builds via `xtool`:
+
+- UI app target: `UVBuddy` (SwiftUI, iOS)
+- Core target: `UVBuddyCore` (pure Swift)
+- No Xcode project required
+
+### Example bundle identifier
+
+Use this bundle identifier for local/device builds:
+
+- `com.kwaga.uvbuddy`
+
+### Signing requirements
+
+To install on a physical iPhone, you need:
+
+1. Apple Developer account (free account works for basic personal testing, paid account recommended for stable provisioning).
+2. A valid signing certificate available on the build machine.
+3. A provisioning profile that matches:
+   - bundle id: `com.kwaga.uvbuddy`
+   - target device UDID (for development provisioning)
+4. Team ID configured in your signing setup.
+
+### Build and install flow (xtool)
+
+1. Confirm toolchain and xtool:
+
+```bash
+swift --version
+xtool --version
+```
+
+2. Validate package first:
+
+```bash
+swift package describe
+swift build
+```
+
+3. Build for iOS with your xtool command/profile (example shape, adapt to your local xtool syntax):
+
+```bash
+xtool build ios --configuration release --bundle-id com.kwaga.uvbuddy
+```
+
+4. Install to connected iPhone (adapt to your local xtool syntax):
+
+```bash
+xtool install ios --bundle-id com.kwaga.uvbuddy
+```
+
+### First device launch checklist
+
+1. iPhone is connected and trusted by host machine.
+2. Correct provisioning profile includes this device.
+3. Bundle id exactly matches profile: `com.kwaga.uvbuddy`.
+4. App signed with matching certificate/team.
+5. Build succeeds in release or debug configuration.
+6. App installs successfully on device.
+7. On first launch, if iOS blocks developer app, open:
+   - Settings -> General -> VPN & Device Management -> Trust Developer.
+8. Launch app and verify:
+   - Home screen renders
+   - Weather fetch works (or cache fallback works)
+   - Debug picker appears only in DEBUG builds
