@@ -1,0 +1,6 @@
+.build/
+.swiftpm/
+.swift-version
+*.tar.gz
+LICENSE.txt
+.DS_Store
